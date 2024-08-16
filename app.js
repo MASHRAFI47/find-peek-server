@@ -48,6 +48,12 @@ async function run() {
             res.send(result);
         })
 
+        //get all products data from db for pagination
+        app.get('/products', async(req, res) => {
+            const result = await productsCollection.find().toArray();
+            res.send(result);
+        })
+
         // app.get('/products', async (req, res) => {
         //     const result = await productsCollection.find().toArray();
         //     res.send(result);
