@@ -32,9 +32,10 @@ async function run() {
 
         app.get('/products', async (req, res) => {
             const filter = req.query;
-            console.log(filter);
+            console.log(filter)
             const query = {
-                price: {$lt: 100}
+                price: {$lt: 200},
+                productName: {$regex: filter.search, $options: 'i'}
             }
             const options = {
                 sort: {
