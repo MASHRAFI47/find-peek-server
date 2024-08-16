@@ -34,9 +34,9 @@ async function run() {
             const filter = req.query;
             console.log(filter)
             const query = {
-                price: {$lt: 200},
-                productName: {$regex: filter.search, $options: 'i'},
-                category: {$regex: filter.category, $options: 'i'},
+                price: { $lt: 200 },
+                productName: { $regex: filter.search, $options: 'i' },
+                category: { $regex: filter.category, $options: 'i' },
             }
             const options = {
                 sort: {
