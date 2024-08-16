@@ -30,6 +30,11 @@ async function run() {
         // await client.connect();
         const productsCollection = client.db("findPeek").collection("products");
 
+        app.get('/products', async(req, res) => {
+            const result = await productsCollection.find().toArray();
+            res.send(result);
+        })
+
         app.post('/products', async (req, res) => {
             const product = req.body;
             const result = await productsCollection.insertOne(product);
