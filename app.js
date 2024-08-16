@@ -30,10 +30,26 @@ async function run() {
         // await client.connect();
         const productsCollection = client.db("findPeek").collection("products");
 
-        app.get('/products', async(req, res) => {
-            const result = await productsCollection.find().toArray();
+        app.get('/products', async (req, res) => {
+            const filter = req.query;
+            console.log(filter);
+            const query = {
+                price: {$lt: 100}
+            }
+            const options = {
+                sort: {
+                    price: filter.sort === 'asc' ? 1 : -1
+                }
+            };
+            const cursor = productsCollection.find(query, options);
+            const result = await cursor.toArray();
             res.send(result);
         })
+
+        // app.get('/products', async (req, res) => {
+        //     const result = await productsCollection.find().toArray();
+        //     res.send(result);
+        // })
 
         app.post('/products', async (req, res) => {
             const product = req.body;
