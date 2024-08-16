@@ -35,11 +35,12 @@ async function run() {
             console.log(filter)
             const query = {
                 price: {$lt: 200},
-                productName: {$regex: filter.search, $options: 'i'}
+                productName: {$regex: filter.search, $options: 'i'},
+                category: {$regex: filter.category, $options: 'i'},
             }
             const options = {
                 sort: {
-                    price: filter.sort === 'asc' ? 1 : -1
+                    price: filter.sort === 'asc' ? 1 : -1,
                 }
             };
             const cursor = productsCollection.find(query, options);
