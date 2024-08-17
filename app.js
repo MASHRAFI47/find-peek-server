@@ -4,7 +4,10 @@ const app = express();
 require("dotenv").config();
 
 //cors
-const cors = require("cors");
+const cors = require('cors');
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+
 const corsOptions = {
     origin: ['http://localhost:5173', 'http://localhost:5174', 'https://common-users.web.app'],
     credentials: true,
@@ -15,6 +18,27 @@ app.use(cors(corsOptions));
 //form
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+//cookie
+app.use(cookieParser())
+
+
+//middlewares
+const verifyToken = (req, res, next) => {
+    const token = req.cookies?.token;
+    if (!token) {
+        return res.status(401).send({ message: "Unauthorized User" })
+    }
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+            console.log(err)
+            return res.status(401).send({ message: "Unauthorized Access" })
+        }
+        req.user = decoded;
+
+        next()
+    })
+}
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -34,6 +58,7 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
         const productsCollection = client.db("findPeek").collection("products");
+
 
         // app.get('/products', async (req, res) => {
         //     const filter = req.query;
@@ -122,8 +147,31 @@ async function run() {
             res.send(result);
         })
 
+
+
+        //jwt
+        app.post('/jwt', async (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '365d'
+            })
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            }).send({ success: true })
+        })
+
+        app.post('/logout', async (req, res) => {
+            const user = req.body;
+            console.log('logging out', user);
+            res
+                .clearCookie('token', { maxAge: 0, sameSite: 'none', secure: true })
+                .send({ success: true })
+        })
+
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
