@@ -60,7 +60,7 @@ async function run() {
             const max = parseInt(req.query.max);
 
             let query = {
-                price: {$gte: min ? min : 1, $lte: max ? max : 1000000},
+                price: { $gte: min ? min : 1, $lte: max ? max : 1000000 },
                 productName: { $regex: search, $options: 'i' },
             };
 
@@ -105,6 +105,11 @@ async function run() {
         //     const result = await productsCollection.find().toArray();
         //     res.send(result);
         // })
+
+        app.get('/products', async (req, res) => {
+            const result = await productsCollection.find().toArray();
+            res.send(result);
+        })
 
         app.post('/products', async (req, res) => {
             const product = req.body;
