@@ -5,7 +5,12 @@ require("dotenv").config();
 
 //cors
 const cors = require("cors");
-app.use(cors());
+const corsOptions = {
+    origin: ['http://localhost:5173', 'http://localhost:5174', 'https://common-users.web.app'],
+    credentials: true,
+    optionsSuccessStatus: 200
+}
+app.use(cors(corsOptions));
 
 //form
 app.use(express.json());
