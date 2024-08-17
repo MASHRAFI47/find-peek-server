@@ -30,35 +30,66 @@ async function run() {
         // await client.connect();
         const productsCollection = client.db("findPeek").collection("products");
 
-        app.get('/products', async (req, res) => {
-            const filter = req.query;
-            const query = {
-                price: { $lt: 200 },
-                productName: { $regex: filter.search, $options: 'i' },
-                category: { $regex: filter.category, $options: 'i' },
-            }
-            const options = {
-                sort: {
-                    price: filter.sort === 'asc' ? 1 : -1,
-                }
-            };
-            const cursor = productsCollection.find(query, options);
-            const result = await cursor.toArray();
-            res.send(result);
-        })
+        // app.get('/products', async (req, res) => {
+        //     const filter = req.query;
+        //     console.log(filter)
+        //     const query = {
+        //         price: { $lt: 200 },
+        //         productName: { $regex: filter.search, $options: 'i' },
+        //         category: { $regex: filter.category, $options: 'i' },
+        //     }
+        //     const options = {
+        //         sort: {
+        //             price: filter.sort === 'asc' ? 1 : -1,
+        //         }
+        //     };
+        //     const cursor = productsCollection.find(query, options);
+        //     const result = await cursor.toArray();
+        //     res.send(result);
+        // })
 
         //get all products data from db for pagination
         app.get('/products-data', async (req, res) => {
             const size = parseInt(req.query.size);
             const page = parseInt(req.query.page) - 1;
-            console.log(size, page)
-            const result = await productsCollection.find().skip(size * page).limit(size).toArray();
+            const filter = req.query.filter;
+            const sort = req.query.sort;
+            const search = req.query.search;
+
+            let query = {
+                productName: { $regex: search, $options: 'i' },
+            };
+
+            if (filter) {
+                query = { ...query, category: filter };
+            }
+
+            const options = {
+                sort: {
+                    price: sort === 'asc' ? 1 : -1,
+                }
+            };
+
+
+            const result = await productsCollection.find(query, options).skip(size * page).limit(size).toArray();
             res.send(result);
         })
 
         //get all products count from db for pagination
         app.get('/products-count', async (req, res) => {
-            const count = await productsCollection.countDocuments();
+
+            const filter = req.query.filter;
+            const search = req.query.search;
+
+            let query = {
+                productName: { $regex: search, $options: 'i' },
+            }
+
+            if (filter) {
+                query = { ...query, category: filter };
+            }
+
+            const count = await productsCollection.countDocuments(query);
             res.send({ count });
         })
 
